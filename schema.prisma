@@ -1,0 +1,69 @@
+// Prisma schema — PostgreSQL.
+// The connection URL lives in prisma.config.js (Prisma 7) and is read from DATABASE_URL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String     @id @default(cuid())
+  username     String     @unique
+  email        String?    @unique
+  passwordHash String?
+  isGuest      Boolean    @default(false)
+  gamesPlayed  Int        @default(0)
+  createdAt    DateTime   @default(now())
+  scores       Score[]
+  saves        GameSave[]
+}
+
+model Game {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  title       String
+  description String
+  category    String
+  type        String     @default("builtin") // "builtin" | "external"
+  url         String? // iframe URL for external games
+  multiplayer Boolean    @default(false)
+  featured    Boolean    @default(false)
+  scoring     String     @default("best") // "best" = max score, "total" = sum of scores
+  maxScore    Int        @default(1000000) // sanity cap enforced by POST /api/scores
+  plays       Int        @default(0)
+  tags        String[]
+  assets      Json       @default("{}") // { icon, from, to, tagline, controls }
+  sortOrder   Int        @default(0)
+  createdAt   DateTime   @default(now())
+  scores      Score[]
+  saves       GameSave[]
+}
+
+model Score {
+  id        String   @id @default(cuid())
+  userId    String
+  gameId    String
+  score     Int
+  meta      Json?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([gameId, score])
+  @@index([userId])
+}
+
+model GameSave {
+  id        String   @id @default(cuid())
+  userId    String
+  gameId    String
+  data      Json
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId])
+}

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Memory Match</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; background: #06050d; color: #e8e6f8; font-family: ui-sans-serif, system-ui, sans-serif; }
+      body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 12px; user-select: none; }
+      #hud { display: flex; gap: 22px; font: 700 15px ui-monospace, Menlo, Consolas, monospace; }
+      #hud b { color: #b6ff3c; }
+      #board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: min(92vw, 62vh, 440px); aspect-ratio: 1; }
+      .card { position: relative; border: 0; padding: 0; background: none; perspective: 600px; cursor: pointer; font-size: clamp(26px, 8vw, 52px); }
+      .card .inner { position: absolute; inset: 0; transition: transform .35s; transform-style: preserve-3d; }
+      .card.flipped .inner, .card.matched .inner { transform: rotateY(180deg); }
+      .face { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 14px; backface-visibility: hidden; border: 1px solid #2a2650; }
+      .front { background: linear-gradient(135deg, #1d1a3a, #14112a); color: #22f0ff; font-size: .55em; box-shadow: inset 0 0 18px rgba(34,240,255,.12); }
+      .back { background: linear-gradient(135deg, #1e3a8a, #6d28d9); transform: rotateY(180deg); }
+      .card.matched .back { background: linear-gradient(135deg, #14532d, #0e7490); box-shadow: 0 0 16px rgba(182,255,60,.45); }
+      .card:focus-visible { outline: 3px solid #22f0ff; outline-offset: 2px; border-radius: 14px; }
+      #overlay { position: fixed; inset: 0; display: none; place-items: center; background: rgba(6,5,13,.82); text-align: center; z-index: 5; }
+      #overlay.show { display: grid; }
+      #overlay h2 { margin: 0 0 6px; font: 900 28px ui-monospace, Menlo, monospace; color: #b6ff3c; letter-spacing: .08em; }
+      #overlay p { margin: 4px 0; color: #c9c6e6; }
+      button.cta { margin-top: 14px; border: 0; border-radius: 12px; padding: 10px 22px; font: 700 14px ui-sans-serif, system-ui; background: #22f0ff; color: #06050d; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <div id="hud"><span>Moves <b id="moves">0</b></span><span>Time <b id="time">0</b>s</span><span>Pairs <b id="pairs">0</b>/8</span></div>
+    <div id="board" role="grid" aria-label="Memory cards"></div>
+
+    <div id="overlay" role="dialog" aria-live="polite">
+      <div>
+        <h2>YOU DID IT!</h2>
+        <p id="summary"></p>
+        <p>Score <b id="final" style="color:#b6ff3c"></b></p>
+        <button class="cta" id="again">Play again</button>
+      </div>
+    </div>
+
+    <!-- Scripts must be external: the hub serves a CSP of script-src 'self'. -->
+    <script src="./game.js"></script>
+  </body>
+</html>

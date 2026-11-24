@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gamehub
+      POSTGRES_PASSWORD: gamehub
+      POSTGRES_DB: gamehub
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gamehub"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://gamehub:gamehub@db:5432/gamehub?schema=public
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET (32+ chars) in your shell or a .env file}
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:4000}
+      ADMIN_KEY: ${ADMIN_KEY:-}
+    ports:
+      - "4000:4000"
+
+volumes:
+  pgdata:
